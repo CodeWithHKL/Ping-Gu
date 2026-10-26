@@ -2,5 +2,4 @@ customtkinter>=5.2.2
 icmplib>=3.0
 psutil>=5.9.0
 requests>=2.31.0
-pyinstaller>=6.0.0
 Pillow>=10.0.0

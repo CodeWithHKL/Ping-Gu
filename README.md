@@ -50,7 +50,22 @@ Web-based speed tests measure download bandwidth to a nearby local server over a
 Ensure you have Python 3.10+ installed on Windows:
 
 ```bash
-git clone [https://github.com/WisterWist/Ping-Gu.git](https://github.com/WisterWist/Ping-Gu.git)
+git clone https://github.com/WisterWist/Ping-Gu.git
 cd Ping-Gu
 pip install -r requirements.txt
 python main.py
+```
+
+### Build the Executable
+```bash
+pip install -r requirements-dev.txt
+python build_exe.py
+```
+The output is `dist/PingGu.exe`.
+
+### Run the Tests
+```bash
+python test_engine.py            # pings live targets
+python test_graph.py             # opens real Tk windows
+python test_app_integration.py   # opens real Tk windows
+```

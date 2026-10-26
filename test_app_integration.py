@@ -1,5 +1,5 @@
 """
-Ping Gu - Phase 3.7 Application Integration Test
+Ping Gu - Application Integration Test
 Automated headless test harness verifying that PingGuApp initializes, integrates
 the VerticalPingGraph, handles custom server persistence, validates custom user timers,
 evaluates unwise session warnings, processes queue samples thread-safely, resets to
