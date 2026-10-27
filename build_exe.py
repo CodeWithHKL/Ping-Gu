@@ -85,6 +85,7 @@ def build_executable() -> bool:
         "--icon", "pingu.ico",
         "--add-data", add_data_jpg,
         "--add-data", add_data_ico,
+        "--add-data", "fonts;fonts",
         "--collect-all", "customtkinter",
         "--hidden-import", "PIL",
         "--hidden-import", "PIL.Image",

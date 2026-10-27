@@ -343,7 +343,7 @@ def run_headless_verification() -> bool:
         assert "SRV / 🏠 IGLOO / DIAG" in graph._lbl_col_rtt.cget("text")
 
         # Verify rendered text on visible row contains dual format
-        slot0_txt = graph._canvas.itemcget(graph._row_slots[0]["rtt_text"], "text")
+        slot0_txt = graph._plot_canvas.itemcget(graph._row_slots[0]["rtt_text"], "text")
         assert "🏠" in slot0_txt, f"Dual readout missing house icon in row text: '{slot0_txt}'"
         print(f"      OK: Dual-track igloo overlay active: '{slot0_txt}'")
 
@@ -351,7 +351,7 @@ def run_headless_verification() -> bool:
         assert graph._show_local_igloo is False, "Igloo overlay not disabled"
         assert "LATENCY SPECTRUM (0 ──────── 250ms CAP)" in graph._lbl_col_bar.cget("text")
         assert "LATENCY  /  DIAGNOSIS" in graph._lbl_col_rtt.cget("text")
-        slot0_single_txt = graph._canvas.itemcget(graph._row_slots[0]["rtt_text"], "text")
+        slot0_single_txt = graph._plot_canvas.itemcget(graph._row_slots[0]["rtt_text"], "text")
         assert "🏠" not in slot0_single_txt, f"Single readout should not contain house icon: '{slot0_single_txt}'"
         print("      OK: Local Igloo overlay toggle works cleanly (split bars & dual readout verified)")
 
