@@ -4,23 +4,29 @@ Arctic Tuxedo theme constants, curated server lists, game simulation profiles,
 and single-EXE safe local configuration persistence.
 """
 
+import ctypes
 import json
 import os
 import sys
+import tkinter as tk
 from typing import Any, Dict, List, Optional
 
 # ============================================================================
 # 1. PING GU THEME PALETTE & UI CONSTANTS
 # ============================================================================
-BG_TUXEDO_DARK = "#0F172A"       # Deep slate arctic navy
-CARD_DARK = "#1E293B"            # Container card slate
-TEXT_SNOW = "#F8FAFC"            # Crisp icy white text
-ACCENT_BEAK_ORANGE = "#FF6B35"   # Pingu beak vibrant orange
-ACCENT_GLACIER_BLUE = "#38BDF8"  # High-tech glacial cyan
-STATUS_GREEN = "#22C55E"         # Low ping / rock-solid stability
-STATUS_YELLOW = "#F59E0B"        # Moderate latency / jitter caution
-STATUS_RED = "#EF4444"           # High ping / packet loss / lag spike
-STATUS_OVERCAP_PURPLE = "#A855F7"# Severe spike exceeding visual ceiling (>250ms)
+BG_TUXEDO_DARK = ("#F3F4F6", "#0D0F12")       # Deep slate arctic navy
+CARD_DARK = ("#FFFFFF", "#15181D")            # Container card slate
+TEXT_SNOW = ("#14171C", "#E8EAED")            # Crisp icy white text
+ACCENT_BEAK_ORANGE = ("#D9480F", "#E8590C")   # Pingu beak vibrant orange
+ACCENT_GLACIER_BLUE = ("#2F6FB5", "#6CA0DC")  # High-tech glacial cyan
+STATUS_GREEN = ("#1E8E57", "#4CB782")         # Low ping / rock-solid stability
+STATUS_YELLOW = ("#B7791F", "#E2B340")        # Moderate latency / jitter caution
+STATUS_RED = ("#D6372E", "#E5534B")           # High ping / packet loss / lag spike
+STATUS_OVERCAP_PURPLE = ("#7C4DD6", "#9D7BE0")# Severe spike exceeding visual ceiling (>250ms)
+
+# Typography: Rajdhani for headings / numerics, Barlow for body text
+FONT_HEAD = "Rajdhani"
+FONT_BODY = "Barlow"
 
 # Visual graph ceiling constant: pings above 250ms are visually capped at 100% bar width
 GRAPH_MAX_CAP_MS = 250.0
@@ -264,3 +270,84 @@ def ensure_app_icon() -> Optional[str]:
     except Exception as e:
         print(f"[presets] Warning: Failed to generate pingu.ico: {e}")
         return None
+
+
+def load_app_fonts() -> None:
+    """
+    Registers the bundled Rajdhani / Barlow TTFs for this process only (Windows),
+    so they work without being installed system-wide. Must run before any Tk window.
+    """
+    if sys.platform != "win32":
+        return
+    fonts_dir = resource_path("fonts")
+    if not os.path.isdir(fonts_dir):
+        return
+    FR_PRIVATE = 0x10
+    add_font = ctypes.windll.gdi32.AddFontResourceExW
+    for name in os.listdir(fonts_dir):
+        if name.lower().endswith(".ttf"):
+            add_font(os.path.join(fonts_dir, name), FR_PRIVATE, 0)
+
+
+# ============================================================================
+# THEME HELPERS (light / dark)
+# Colours are (light, dark) tuples, which CustomTkinter resolves automatically.
+# Raw tk widgets and canvas items need them resolved by hand.
+# ============================================================================
+def is_light_mode() -> bool:
+    import customtkinter as ctk
+    return ctk.get_appearance_mode() == "Light"
+
+
+def pick_color(color: Any) -> Any:
+    """Resolves a (light, dark) tuple to the colour for the current mode."""
+    if isinstance(color, (tuple, list)):
+        return color[0] if is_light_mode() else color[1]
+    return color
+
+
+class ThemedCanvas(tk.Canvas):
+    """tk.Canvas that accepts (light, dark) colour tuples and can re-theme in place."""
+
+    _ITEM_OPTS = ("fill", "outline")
+
+    def __init__(self, master=None, **kw):
+        self._item_specs: Dict[Any, Any] = {}
+        self._bg_spec: Any = None
+        if isinstance(kw.get("bg"), (tuple, list)):
+            self._bg_spec = kw["bg"]
+            kw["bg"] = pick_color(kw["bg"])
+        super().__init__(master, **kw)
+
+    def _create(self, itemType, args, kw):
+        specs = {}
+        for opt in self._ITEM_OPTS:
+            if isinstance(kw.get(opt), (tuple, list)):
+                specs[opt] = kw[opt]
+                kw[opt] = pick_color(kw[opt])
+        item = super()._create(itemType, args, kw)
+        for opt, spec in specs.items():
+            self._item_specs[(item, opt)] = spec
+        return item
+
+    def itemconfigure(self, tagOrId, cnf=None, **kw):
+        if isinstance(tagOrId, int):
+            for opt in self._ITEM_OPTS:
+                if opt in kw:
+                    if isinstance(kw[opt], (tuple, list)):
+                        self._item_specs[(tagOrId, opt)] = kw[opt]
+                        kw[opt] = pick_color(kw[opt])
+                    else:
+                        self._item_specs.pop((tagOrId, opt), None)
+        return super().itemconfigure(tagOrId, cnf, **kw)
+
+    itemconfig = itemconfigure
+
+    def apply_theme(self) -> None:
+        if self._bg_spec is not None:
+            super().configure(bg=pick_color(self._bg_spec))
+        for (item, opt), spec in self._item_specs.items():
+            try:
+                tk.Canvas.itemconfigure(self, item, **{opt: pick_color(spec)})
+            except tk.TclError:
+                pass

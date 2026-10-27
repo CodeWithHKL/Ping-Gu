@@ -7,11 +7,16 @@ Playfully themed around Pingu with Arctic Tuxedo styling.
 import sys
 import customtkinter as ctk
 
-from ui_main import PingGuApp
+from presets import load_app_fonts, load_user_config
+
+load_app_fonts()
+
+from ui_main import PingGuApp  # noqa: E402 (fonts must register first)
 
 
 def main() -> None:
-    ctk.set_appearance_mode("Dark")
+    theme = load_user_config().get("theme", "Dark")
+    ctk.set_appearance_mode(theme if theme in ("Light", "Dark") else "Dark")
     ctk.set_default_color_theme("blue")
 
     app = PingGuApp()

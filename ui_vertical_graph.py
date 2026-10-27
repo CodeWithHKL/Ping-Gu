@@ -13,6 +13,10 @@ from typing import Any, Deque, Dict, List, Optional
 import customtkinter as ctk
 
 from presets import (
+    ThemedCanvas,
+    pick_color,
+    FONT_BODY,
+    FONT_HEAD,
     ACCENT_BEAK_ORANGE,
     ACCENT_GLACIER_BLUE,
     BG_TUXEDO_DARK,
@@ -36,11 +40,11 @@ COL_TAG_RTT_WIDTH_SINGLE = 175# Width of latency value + diagnostic badge column
 COL_TAG_RTT_WIDTH_DUAL = 245  # Width of latency value + diagnostic badge column (dual-track igloo)
 COL_TAG_RTT_WIDTH = COL_TAG_RTT_WIDTH_SINGLE  # Backwards compatibility default
 LOCAL_IGLOO_CEILING_MS = 50.0 # 50ms local ceiling for readable Wi-Fi/LAN bar scaling
-CANVAS_BG = "#0B1120"         # Deep abyss dark slate canvas background
-TRACK_BG = "#1E293B"          # Latency bar slot container background
-TRACK_BORDER = "#334155"      # Latency bar slot border
-HOVER_BG = "#1E293B"          # Background tint when row is hovered
-HOVER_BORDER = "#475569"      # Highlight outline for hovered row
+CANVAS_BG = ("#ECEEF2", "#0A0C0F")         # Deep abyss dark slate canvas background
+TRACK_BG = ("#FFFFFF", "#15181D")          # Latency bar slot container background
+TRACK_BORDER = ("#D5D9E0", "#262B33")      # Latency bar slot border
+HOVER_BG = ("#FFFFFF", "#15181D")          # Background tint when row is hovered
+HOVER_BORDER = ("#B8BFC9", "#3A414C")      # Highlight outline for hovered row
 SELECT_BORDER = ACCENT_GLACIER_BLUE  # Selection accent border for clicked row
 MAX_VISIBLE_ROWS = 45         # Pre-allocated row item pool size
 
@@ -79,22 +83,22 @@ class InfoTooltip:
             tw.wm_attributes("-topmost", True)
         except Exception:
             pass
-        tw.configure(bg="#0F172A")
+        tw.configure(bg=pick_color(("#F3F4F6", "#0D0F12")))
 
         # Container frame for styling
-        outer = tk.Frame(tw, bg="#38BDF8", bd=1)
+        outer = tk.Frame(tw, bg=pick_color(("#2F6FB5", "#6CA0DC")), bd=1)
         outer.pack(fill="both", expand=True)
 
-        inner = tk.Frame(outer, bg="#0F172A", padx=10, pady=8)
+        inner = tk.Frame(outer, bg=pick_color(("#F3F4F6", "#0D0F12")), padx=10, pady=8)
         inner.pack(fill="both", expand=True)
 
         if self.title:
             lbl_title = tk.Label(
                 inner,
                 text=self.title,
-                font=("Segoe UI", 10, "bold"),
-                fg="#38BDF8",
-                bg="#0F172A",
+                font=(FONT_BODY, 11, "bold"),
+                fg=pick_color(("#2F6FB5", "#6CA0DC")),
+                bg=pick_color(("#F3F4F6", "#0D0F12")),
                 anchor="w",
                 justify="left"
             )
@@ -103,9 +107,9 @@ class InfoTooltip:
         lbl_body = tk.Label(
             inner,
             text=self.text,
-            font=("Segoe UI", 9),
-            fg="#F8FAFC",
-            bg="#0F172A",
+            font=(FONT_BODY, 10),
+            fg=pick_color(("#14171C", "#E8EAED")),
+            bg=pick_color(("#F3F4F6", "#0D0F12")),
             wraplength=270,
             justify="left",
             anchor="w"
@@ -156,10 +160,10 @@ def create_help_badge(parent: Any, text: str, title: str = "") -> ctk.CTkButton:
         text="?",
         width=20,
         height=20,
-        corner_radius=10,
-        font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
-        fg_color="#334155",
-        text_color="#94A3B8",
+        corner_radius=4,
+        font=ctk.CTkFont(family=FONT_HEAD, size=13, weight="bold"),
+        fg_color=("#D5D9E0", "#262B33"),
+        text_color=("#5B6472", "#9BA3AF"),
         hover_color=ACCENT_GLACIER_BLUE,
         cursor="hand2"
     )
@@ -217,12 +221,12 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._create_item_pool()
 
         # Bindings for resize & controls
-        self._canvas.bind("<Configure>", self._on_canvas_configure)
-        self._canvas.bind("<Motion>", self._on_canvas_motion)
-        self._canvas.bind("<Button-1>", self._on_canvas_click)
-        self._canvas.bind("<Enter>", self._on_canvas_enter)
-        self._canvas.bind("<Leave>", self._on_canvas_leave)
-        self._canvas.bind("<MouseWheel>", self._on_canvas_mousewheel)
+        self._plot_canvas.bind("<Configure>", self._on_canvas_configure)
+        self._plot_canvas.bind("<Motion>", self._on_canvas_motion)
+        self._plot_canvas.bind("<Button-1>", self._on_canvas_click)
+        self._plot_canvas.bind("<Enter>", self._on_canvas_enter)
+        self._plot_canvas.bind("<Leave>", self._on_canvas_leave)
+        self._plot_canvas.bind("<MouseWheel>", self._on_canvas_mousewheel)
 
     # ========================================================================
     # 1. UI COMPONENT CREATION
@@ -232,7 +236,7 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._header_frame = ctk.CTkFrame(
             self,
             fg_color=CARD_DARK,
-            corner_radius=8,
+            corner_radius=4,
             height=38
         )
         self._header_frame.pack(fill="x", padx=6, pady=(6, 4))
@@ -241,8 +245,8 @@ class VerticalPingGraph(ctk.CTkFrame):
         # Left: Stream Title & Status
         self._title_label = ctk.CTkLabel(
             self._header_frame,
-            text="⚡ Real-Time Latency Stream",
-            font=ctk.CTkFont(size=13, weight="bold"),
+            text="Real-Time Latency Stream",
+            font=ctk.CTkFont(family=FONT_HEAD, size=15, weight="bold"),
             text_color=TEXT_SNOW
         )
         self._title_label.pack(side="left", padx=(12, 4))
@@ -257,8 +261,8 @@ class VerticalPingGraph(ctk.CTkFrame):
         # Status Badge (Live vs Paused vs Scrolled)
         self._status_badge = ctk.CTkLabel(
             self._header_frame,
-            text="🟢 LIVE (Auto-follow)",
-            font=ctk.CTkFont(size=11, weight="bold"),
+            text="LIVE (Auto-follow)",
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
             text_color=STATUS_GREEN
         )
         self._status_badge.pack(side="left", padx=4)
@@ -269,9 +273,10 @@ class VerticalPingGraph(ctk.CTkFrame):
             text="Clear Bars",
             width=75,
             height=24,
-            font=ctk.CTkFont(size=11),
-            fg_color="#334155",
-            hover_color="#475569",
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            fg_color=("#D5D9E0", "#262B33"),
+            text_color=TEXT_SNOW,
+            hover_color=("#B8BFC9", "#3A414C"),
             command=self.clear_samples
         )
         self._clear_btn.pack(side="right", padx=(4, 10))
@@ -281,9 +286,10 @@ class VerticalPingGraph(ctk.CTkFrame):
             text="▶ Resume Live",
             width=90,
             height=24,
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
             fg_color=ACCENT_BEAK_ORANGE,
-            hover_color="#EA580C",
+            text_color="#FFFFFF",
+            hover_color=("#B53B0A", "#C2410C"),
             command=self.resume_live
         )
 
@@ -291,7 +297,7 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._igloo_switch = ctk.CTkSwitch(
             self._header_frame,
             text="Show Local Ping",
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
             text_color=TEXT_SNOW,
             progress_color=ACCENT_GLACIER_BLUE,
             command=self._on_igloo_switch_toggled
@@ -316,8 +322,8 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._lbl_col_seq = ctk.CTkLabel(
             self._col_header_frame,
             text="PKT #   TIME",
-            font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
-            text_color="#64748B",
+            font=ctk.CTkFont(family=FONT_HEAD, size=12, weight="bold"),
+            text_color=("#7A828F", "#6B7280"),
             width=COL_SEQ_TIME_WIDTH,
             anchor="w"
         )
@@ -327,8 +333,8 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._lbl_col_rtt = ctk.CTkLabel(
             self._col_header_frame,
             text="LATENCY  /  DIAGNOSIS",
-            font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
-            text_color="#64748B",
+            font=ctk.CTkFont(family=FONT_HEAD, size=12, weight="bold"),
+            text_color=("#7A828F", "#6B7280"),
             width=COL_TAG_RTT_WIDTH_SINGLE,
             anchor="e"
         )
@@ -338,8 +344,8 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._lbl_col_bar = ctk.CTkLabel(
             self._col_header_frame,
             text="LATENCY SPECTRUM (0 ──────── 250ms CAP)",
-            font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
-            text_color="#64748B",
+            font=ctk.CTkFont(family=FONT_HEAD, size=12, weight="bold"),
+            text_color=("#7A828F", "#6B7280"),
             anchor="center"
         )
         self._lbl_col_bar.pack(side="left", fill="x", expand=True)
@@ -351,8 +357,8 @@ class VerticalPingGraph(ctk.CTkFrame):
         if not hasattr(self, "_lbl_col_bar") or not hasattr(self, "_lbl_col_rtt"):
             return
         if self._show_local_igloo:
-            self._lbl_col_bar.configure(text="SPECTRUM (TOP: SERVER 250ms | BOTTOM: 🏠 IGLOO 50ms)")
-            self._lbl_col_rtt.configure(text="SRV / 🏠 IGLOO / DIAG", width=COL_TAG_RTT_WIDTH_DUAL)
+            self._lbl_col_bar.configure(text="SPECTRUM (TOP: SERVER 250ms | BOTTOM: IGLOO 50ms)")
+            self._lbl_col_rtt.configure(text="SRV / IGLOO / DIAG", width=COL_TAG_RTT_WIDTH_DUAL)
         else:
             self._lbl_col_bar.configure(text="LATENCY SPECTRUM (0 ──────── 250ms CAP)")
             self._lbl_col_rtt.configure(text="LATENCY  /  DIAGNOSIS", width=COL_TAG_RTT_WIDTH_SINGLE)
@@ -362,29 +368,29 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._center_container = ctk.CTkFrame(
             self,
             fg_color=CANVAS_BG,
-            corner_radius=8,
+            corner_radius=4,
             border_width=1,
-            border_color="#1E293B"
+            border_color=("#FFFFFF", "#15181D")
         )
         self._center_container.pack(fill="both", expand=True, padx=6, pady=2)
 
         # Native tk.Canvas with zero border to maintain Windows double buffering
-        self._canvas = tk.Canvas(
+        self._plot_canvas = ThemedCanvas(
             self._center_container,
             bg=CANVAS_BG,
             highlightthickness=0,
             bd=0
         )
-        self._canvas.pack(side="left", fill="both", expand=True)
+        self._plot_canvas.pack(side="left", fill="both", expand=True)
 
         # CustomTkinter Vertical Scrollbar
         self._scrollbar = ctk.CTkScrollbar(
             self._center_container,
             orientation="vertical",
             command=self._on_scrollbar_move,
-            fg_color="#0F172A",
-            button_color="#334155",
-            button_hover_color="#475569"
+            fg_color=("#F3F4F6", "#0D0F12"),
+            button_color=("#D5D9E0", "#262B33"),
+            button_hover_color=("#B8BFC9", "#3A414C")
         )
         self._scrollbar.pack(side="right", fill="y", padx=(0, 2), pady=2)
 
@@ -393,18 +399,18 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._inspector_card = ctk.CTkFrame(
             self,
             fg_color=CARD_DARK,
-            corner_radius=8,
+            corner_radius=4,
             border_width=1,
-            border_color="#334155"
+            border_color=("#D5D9E0", "#262B33")
         )
         self._inspector_card.pack(fill="x", padx=6, pady=(4, 6))
 
         # Default placeholder when no sample is clicked
         self._inspector_placeholder = ctk.CTkLabel(
             self._inspector_card,
-            text="🔍 Click any packet bar above to inspect forensic hop latency, protocol framing & root cause analysis.",
-            font=ctk.CTkFont(size=11),
-            text_color="#94A3B8"
+            text="Click any packet bar above to inspect forensic hop latency, protocol framing & root cause analysis.",
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            text_color=("#5B6472", "#9BA3AF")
         )
         self._inspector_placeholder.pack(fill="x", padx=12, pady=10)
 
@@ -418,7 +424,7 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._insp_seq_badge = ctk.CTkLabel(
             self._insp_row1,
             text="PKT #000",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(family=FONT_HEAD, size=14, weight="bold"),
             text_color=ACCENT_BEAK_ORANGE
         )
         self._insp_seq_badge.pack(side="left", padx=(0, 10))
@@ -426,7 +432,7 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._insp_time_lbl = ctk.CTkLabel(
             self._insp_row1,
             text="Time: --:--:--.---",
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
             text_color=TEXT_SNOW
         )
         self._insp_time_lbl.pack(side="left", padx=(0, 12))
@@ -434,7 +440,7 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._insp_proto_lbl = ctk.CTkLabel(
             self._insp_row1,
             text="Protocol: ICMP (32 B)",
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
             text_color=ACCENT_GLACIER_BLUE
         )
         self._insp_proto_lbl.pack(side="left", padx=(0, 12))
@@ -442,19 +448,20 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._insp_tag_badge = ctk.CTkLabel(
             self._insp_row1,
             text="[NORMAL]",
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
             text_color=STATUS_GREEN
         )
         self._insp_tag_badge.pack(side="left")
 
         self._insp_close_btn = ctk.CTkButton(
             self._insp_row1,
-            text="✕ Deselect",
+            text="Deselect",
             width=70,
             height=20,
-            font=ctk.CTkFont(size=10),
-            fg_color="#334155",
-            hover_color="#475569",
+            font=ctk.CTkFont(family=FONT_BODY, size=11),
+            fg_color=("#D5D9E0", "#262B33"),
+            text_color=TEXT_SNOW,
+            hover_color=("#B8BFC9", "#3A414C"),
             command=self._clear_selection
         )
         self._insp_close_btn.pack(side="right")
@@ -465,42 +472,42 @@ class VerticalPingGraph(ctk.CTkFrame):
 
         self._chip_server = ctk.CTkLabel(
             self._insp_row2,
-            text="🎯 Server RTT: -- ms",
-            font=ctk.CTkFont(size=11, weight="bold"),
+            text="Server RTT: -- ms",
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
             text_color=TEXT_SNOW
         )
         self._chip_server.pack(side="left", padx=(0, 16))
 
         self._chip_local = ctk.CTkLabel(
             self._insp_row2,
-            text="🏠 Local Igloo (Router): -- ms",
-            font=ctk.CTkFont(size=11),
+            text="Local Igloo (Router): -- ms",
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
             text_color=ACCENT_GLACIER_BLUE
         )
         self._chip_local.pack(side="left", padx=(0, 16))
 
         self._chip_wan = ctk.CTkLabel(
             self._insp_row2,
-            text="🌐 WAN Data: -- B",
-            font=ctk.CTkFont(size=11),
-            text_color="#94A3B8"
+            text="WAN Data: -- B",
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            text_color=("#5B6472", "#9BA3AF")
         )
         self._chip_wan.pack(side="left")
 
         # Bottom row: Forensic Detail Diagnosis
         self._insp_detail_box = ctk.CTkFrame(
             self._inspector_content,
-            fg_color="#0F172A",
-            corner_radius=6,
+            fg_color=("#F3F4F6", "#0D0F12"),
+            corner_radius=3,
             border_width=1,
-            border_color="#334155"
+            border_color=("#D5D9E0", "#262B33")
         )
         self._insp_detail_box.pack(fill="x", padx=8, pady=(4, 6))
 
         self._insp_detail_lbl = ctk.CTkLabel(
             self._insp_detail_box,
-            text="🐧 Forensic Analysis: Smooth sliding! Normal latency.",
-            font=ctk.CTkFont(size=11),
+            text="Forensic Analysis: Smooth sliding! Normal latency.",
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
             text_color=TEXT_SNOW,
             anchor="w",
             justify="left"
@@ -518,20 +525,20 @@ class VerticalPingGraph(ctk.CTkFrame):
         self._row_slots: List[Dict[str, int]] = []
 
         for _ in range(MAX_VISIBLE_ROWS):
-            hover_box = self._canvas.create_rectangle(0, 0, 0, 0, fill="", outline="", state="hidden")
-            sep = self._canvas.create_line(0, 0, 0, 0, fill="#131D31", width=1, state="hidden")
-            seq = self._canvas.create_text(0, 0, text="", fill="#94A3B8", font=("Consolas", 9, "bold"), anchor="w", state="hidden")
-            time_txt = self._canvas.create_text(0, 0, text="", fill="#64748B", font=("Consolas", 9), anchor="w", state="hidden")
-            track = self._canvas.create_rectangle(0, 0, 0, 0, fill=TRACK_BG, outline=TRACK_BORDER, width=1, state="hidden")
-            srv_bar = self._canvas.create_rectangle(0, 0, 0, 0, fill="", outline="", state="hidden")
-            cap_line = self._canvas.create_line(0, 0, 0, 0, fill="#F43F5E", width=3, state="hidden")
-            igloo_bar = self._canvas.create_rectangle(0, 0, 0, 0, fill=ACCENT_GLACIER_BLUE, outline="", state="hidden")
-            ibadge_box = self._canvas.create_rectangle(0, 0, 0, 0, fill="#0369A1", outline="#38BDF8", width=1, state="hidden")
-            ibadge_txt = self._canvas.create_text(0, 0, text="🏠 IGLOO SPIKE", fill="#F0F9FF", font=("Segoe UI", 7, "bold"), anchor="center", state="hidden")
-            lost_txt = self._canvas.create_text(0, 0, text="LOST / TIMEOUT", fill="#FCA5A5", font=("Segoe UI", 8, "bold"), anchor="center", state="hidden")
-            rtt_txt = self._canvas.create_text(0, 0, text="", fill=TEXT_SNOW, font=("Consolas", 9, "bold"), anchor="w", state="hidden")
-            dbadge_box = self._canvas.create_rectangle(0, 0, 0, 0, fill="", outline="", state="hidden")
-            dbadge_txt = self._canvas.create_text(0, 0, text="", fill="", font=("Segoe UI", 7, "bold"), anchor="center", state="hidden")
+            hover_box = self._plot_canvas.create_rectangle(0, 0, 0, 0, fill="", outline="", state="hidden")
+            sep = self._plot_canvas.create_line(0, 0, 0, 0, fill=("#E9EBEF", "#101318"), width=1, state="hidden")
+            seq = self._plot_canvas.create_text(0, 0, text="", fill=("#5B6472", "#9BA3AF"), font=(FONT_HEAD, 11, "bold"), anchor="w", state="hidden")
+            time_txt = self._plot_canvas.create_text(0, 0, text="", fill=("#7A828F", "#6B7280"), font=(FONT_HEAD, 11), anchor="w", state="hidden")
+            track = self._plot_canvas.create_rectangle(0, 0, 0, 0, fill=TRACK_BG, outline=TRACK_BORDER, width=1, state="hidden")
+            srv_bar = self._plot_canvas.create_rectangle(0, 0, 0, 0, fill="", outline="", state="hidden")
+            cap_line = self._plot_canvas.create_line(0, 0, 0, 0, fill=("#D6372E", "#E5534B"), width=3, state="hidden")
+            igloo_bar = self._plot_canvas.create_rectangle(0, 0, 0, 0, fill=ACCENT_GLACIER_BLUE, outline="", state="hidden")
+            ibadge_box = self._plot_canvas.create_rectangle(0, 0, 0, 0, fill=("#D6E6F7", "#1F4E79"), outline=("#2F6FB5", "#6CA0DC"), width=1, state="hidden")
+            ibadge_txt = self._plot_canvas.create_text(0, 0, text="IGLOO SPIKE", fill=("#12304F", "#EEF3F9"), font=(FONT_BODY, 8, "bold"), anchor="center", state="hidden")
+            lost_txt = self._plot_canvas.create_text(0, 0, text="LOST / TIMEOUT", fill=("#9B1C1C", "#FCA5A5"), font=(FONT_BODY, 8, "bold"), anchor="center", state="hidden")
+            rtt_txt = self._plot_canvas.create_text(0, 0, text="", fill=TEXT_SNOW, font=(FONT_HEAD, 11, "bold"), anchor="w", state="hidden")
+            dbadge_box = self._plot_canvas.create_rectangle(0, 0, 0, 0, fill="", outline="", state="hidden")
+            dbadge_txt = self._plot_canvas.create_text(0, 0, text="", fill="", font=(FONT_BODY, 8, "bold"), anchor="center", state="hidden")
 
             self._row_slots.append({
                 "hover_box": hover_box,
@@ -551,11 +558,11 @@ class VerticalPingGraph(ctk.CTkFrame):
             })
 
         # Single pre-created empty state text item
-        self._empty_text_id = self._canvas.create_text(
+        self._empty_text_id = self._plot_canvas.create_text(
             0, 0,
-            text="🐧 Waiting for network pings... Start scanning to view live latency stream.",
-            fill="#475569",
-            font=("Segoe UI", 11, "italic"),
+            text="Waiting for network pings... Start scanning to view live latency stream.",
+            fill=("#B8BFC9", "#3A414C"),
+            font=(FONT_BODY, 11, "italic"),
             anchor="center",
             state="normal"
         )
@@ -662,12 +669,17 @@ class VerticalPingGraph(ctk.CTkFrame):
             return self._frozen_samples
         return list(self._samples)
 
+    def apply_theme(self) -> None:
+        """Re-colours the canvas after a light/dark switch."""
+        self._plot_canvas.apply_theme()
+        self._render_canvas()
+
     def _render_canvas(self) -> None:
         """
         In-place canvas updater using pre-allocated item slots.
         NEVER calls canvas.delete('all'), completely eliminating GDI blink.
         """
-        canvas = self._canvas
+        canvas = self._plot_canvas
         active_samples = self._get_active_samples()
         total_samples = len(active_samples)
 
@@ -737,7 +749,7 @@ class VerticalPingGraph(ctk.CTkFrame):
                 # 1. Hover & Selection highlight
                 if is_selected:
                     canvas.coords(slot["hover_box"], 2, y_top + 1, canvas_width - 2, y_bottom - 1)
-                    canvas.itemconfigure(slot["hover_box"], fill="#1E293B", outline=SELECT_BORDER, width=1.5, state="normal")
+                    canvas.itemconfigure(slot["hover_box"], fill=("#FFFFFF", "#15181D"), outline=SELECT_BORDER, width=1.5, state="normal")
                     canvas.itemconfigure(slot["separator"], state="hidden")
                 elif is_hovered:
                     canvas.coords(slot["hover_box"], 2, y_top + 1, canvas_width - 2, y_bottom - 1)
@@ -754,7 +766,7 @@ class VerticalPingGraph(ctk.CTkFrame):
                 canvas.itemconfigure(
                     slot["seq_text"],
                     text=f"#{sample.seq_id:03d}",
-                    fill=TEXT_SNOW if is_hovered else "#94A3B8",
+                    fill=TEXT_SNOW if is_hovered else ("#5B6472", "#9BA3AF"),
                     state="normal"
                 )
 
@@ -777,7 +789,7 @@ class VerticalPingGraph(ctk.CTkFrame):
 
                     if sample.is_timeout or sample.server_rtt_ms is None:
                         canvas.coords(slot["server_bar"], bar_x1 + 1, srv_top, bar_x2 - 1, srv_bottom)
-                        canvas.itemconfigure(slot["server_bar"], fill="#7F1D1D", outline="#EF4444", width=1, state="normal")
+                        canvas.itemconfigure(slot["server_bar"], fill=("#FBE0DE", "#7F1D1D"), outline=("#D6372E", "#E5534B"), width=1, state="normal")
                         canvas.coords(slot["lost_text"], bar_x1 + (bar_track_width // 2), y_top + (ROW_HEIGHT // 2))
                         canvas.itemconfigure(slot["lost_text"], state="normal")
                         canvas.itemconfigure(slot["overcap_line"], state="hidden")
@@ -843,7 +855,7 @@ class VerticalPingGraph(ctk.CTkFrame):
 
                     if sample.is_timeout or sample.server_rtt_ms is None:
                         canvas.coords(slot["server_bar"], bar_x1 + 1, srv_top, bar_x2 - 1, srv_bottom)
-                        canvas.itemconfigure(slot["server_bar"], fill="#7F1D1D", outline="#EF4444", width=1, state="normal")
+                        canvas.itemconfigure(slot["server_bar"], fill=("#FBE0DE", "#7F1D1D"), outline=("#D6372E", "#E5534B"), width=1, state="normal")
                         canvas.coords(slot["lost_text"], bar_x1 + (bar_track_width // 2), srv_top + 4)
                         canvas.itemconfigure(slot["lost_text"], state="normal")
                         canvas.itemconfigure(slot["overcap_line"], state="hidden")
@@ -890,10 +902,10 @@ class VerticalPingGraph(ctk.CTkFrame):
 
                         canvas.coords(slot["igloo_bar"], bar_x1 + 1, igloo_top, loc_x2, igloo_bottom)
                         canvas.itemconfigure(slot["igloo_bar"], fill=loc_color, outline="", state="normal")
-                        loc_str = f"🏠 {loc_rtt:.1f}ms"
+                        loc_str = f"{loc_rtt:.1f}ms"
                     else:
                         canvas.itemconfigure(slot["igloo_bar"], state="hidden")
-                        loc_str = "🏠 --"
+                        loc_str = "--"
 
                     # Dual readout text
                     val_text = f"{srv_str} | {loc_str}"
@@ -920,13 +932,13 @@ class VerticalPingGraph(ctk.CTkFrame):
 
                 if tag in ("PACKET_LOST", "LOCAL_IGLOO_SPIKE", "BUFFERBLOAT_SPIKE", "ISP_BLIZZARD_SPIKE"):
                     if tag == "PACKET_LOST":
-                        b_txt = "LOST"; bg_col = "#7F1D1D"; fg_col = "#FCA5A5"; out_col = "#7F1D1D"
+                        b_txt = "LOST"; bg_col = ("#FBE0DE", "#7F1D1D"); fg_col = ("#9B1C1C", "#FCA5A5"); out_col = ("#FBE0DE", "#7F1D1D")
                     elif tag == "LOCAL_IGLOO_SPIKE":
-                        b_txt = "IGLOO"; bg_col = "#0369A1"; fg_col = "#BAE6FD"; out_col = "#0369A1"
+                        b_txt = "IGLOO"; bg_col = ("#D6E6F7", "#1F4E79"); fg_col = ("#23405F", "#C9DDF2"); out_col = ("#D6E6F7", "#1F4E79")
                     elif tag == "BUFFERBLOAT_SPIKE":
-                        b_txt = "BLOAT"; bg_col = "#78350F"; fg_col = "#FDE68A"; out_col = "#78350F"
+                        b_txt = "BLOAT"; bg_col = ("#F3E3B8", "#4A3A14"); fg_col = ("#92400E", "#FDE68A"); out_col = ("#F3E3B8", "#4A3A14")
                     else:
-                        b_txt = "BLIZZARD"; bg_col = "#1E1B4B"; fg_col = "#C7D2FE"; out_col = "#6366F1"
+                        b_txt = "BLIZZARD"; bg_col = ("#E3E9F3", "#1A2233"); fg_col = ("#26344D", "#C9D6EA"); out_col = ("#3E64A3", "#5B7FBF")
 
                     w = len(b_txt) * 7 + 12
                     h = 16
@@ -938,11 +950,11 @@ class VerticalPingGraph(ctk.CTkFrame):
                     canvas.coords(slot["diag_badge_box"], bx1, by1, bx2, by2)
                     canvas.itemconfigure(slot["diag_badge_box"], fill=bg_col, outline=out_col, state="normal")
                     canvas.coords(slot["diag_badge_text"], bx1 + (w // 2), center_y)
-                    canvas.itemconfigure(slot["diag_badge_text"], text=b_txt, fill=fg_col, font=("Segoe UI", 7, "bold"), state="normal")
+                    canvas.itemconfigure(slot["diag_badge_text"], text=b_txt, fill=fg_col, font=(FONT_BODY, 8, "bold"), state="normal")
                 elif tag == "OK":
                     canvas.itemconfigure(slot["diag_badge_box"], state="hidden")
                     canvas.coords(slot["diag_badge_text"], badge_x - 6, center_y)
-                    canvas.itemconfigure(slot["diag_badge_text"], text="✓", fill=STATUS_GREEN, font=("Segoe UI", 9, "bold"), state="normal")
+                    canvas.itemconfigure(slot["diag_badge_text"], text="", fill=STATUS_GREEN, font=(FONT_BODY, 9, "bold"), state="normal")
                 else:
                     canvas.itemconfigure(slot["diag_badge_box"], state="hidden")
                     canvas.itemconfigure(slot["diag_badge_text"], state="hidden")
@@ -975,7 +987,7 @@ class VerticalPingGraph(ctk.CTkFrame):
             return
         sample = active_samples[sample_idx]
 
-        canvas_width = self._canvas.winfo_width()
+        canvas_width = self._plot_canvas.winfo_width()
         y_top = slot_idx * ROW_HEIGHT
         y_bottom = y_top + ROW_HEIGHT
 
@@ -983,20 +995,20 @@ class VerticalPingGraph(ctk.CTkFrame):
         is_hovered = (self._hovered_row_idx == row_idx)
 
         if is_selected:
-            self._canvas.coords(slot["hover_box"], 2, y_top + 1, canvas_width - 2, y_bottom - 1)
-            self._canvas.itemconfigure(slot["hover_box"], fill="#1E293B", outline=SELECT_BORDER, width=1.5, state="normal")
-            self._canvas.itemconfigure(slot["separator"], state="hidden")
-            self._canvas.itemconfigure(slot["seq_text"], fill=TEXT_SNOW)
+            self._plot_canvas.coords(slot["hover_box"], 2, y_top + 1, canvas_width - 2, y_bottom - 1)
+            self._plot_canvas.itemconfigure(slot["hover_box"], fill=("#FFFFFF", "#15181D"), outline=SELECT_BORDER, width=1.5, state="normal")
+            self._plot_canvas.itemconfigure(slot["separator"], state="hidden")
+            self._plot_canvas.itemconfigure(slot["seq_text"], fill=TEXT_SNOW)
         elif is_hovered:
-            self._canvas.coords(slot["hover_box"], 2, y_top + 1, canvas_width - 2, y_bottom - 1)
-            self._canvas.itemconfigure(slot["hover_box"], fill=HOVER_BG, outline=HOVER_BORDER, width=1, state="normal")
-            self._canvas.itemconfigure(slot["separator"], state="hidden")
-            self._canvas.itemconfigure(slot["seq_text"], fill=TEXT_SNOW)
+            self._plot_canvas.coords(slot["hover_box"], 2, y_top + 1, canvas_width - 2, y_bottom - 1)
+            self._plot_canvas.itemconfigure(slot["hover_box"], fill=HOVER_BG, outline=HOVER_BORDER, width=1, state="normal")
+            self._plot_canvas.itemconfigure(slot["separator"], state="hidden")
+            self._plot_canvas.itemconfigure(slot["seq_text"], fill=TEXT_SNOW)
         else:
-            self._canvas.itemconfigure(slot["hover_box"], state="hidden")
-            self._canvas.coords(slot["separator"], 4, y_bottom, canvas_width - 4, y_bottom)
-            self._canvas.itemconfigure(slot["separator"], state="normal")
-            self._canvas.itemconfigure(slot["seq_text"], fill="#94A3B8")
+            self._plot_canvas.itemconfigure(slot["hover_box"], state="hidden")
+            self._plot_canvas.coords(slot["separator"], 4, y_bottom, canvas_width - 4, y_bottom)
+            self._plot_canvas.itemconfigure(slot["separator"], state="normal")
+            self._plot_canvas.itemconfigure(slot["seq_text"], fill=("#5B6472", "#9BA3AF"))
 
     def _on_canvas_motion(self, event: tk.Event) -> None:
         """
@@ -1084,7 +1096,7 @@ class VerticalPingGraph(ctk.CTkFrame):
         if total_samples == 0:
             return
 
-        canvas_height = self._canvas.winfo_height()
+        canvas_height = self._plot_canvas.winfo_height()
         max_start_row = max(0, total_samples - (canvas_height // ROW_HEIGHT))
 
         if action == "moveto":
@@ -1105,7 +1117,7 @@ class VerticalPingGraph(ctk.CTkFrame):
         if total_samples == 0:
             return
 
-        canvas_height = self._canvas.winfo_height()
+        canvas_height = self._plot_canvas.winfo_height()
         max_start_row = max(0, total_samples - (canvas_height // ROW_HEIGHT))
 
         new_top = max(0, min(max_start_row, self._scroll_top_row + delta_rows))
@@ -1146,7 +1158,7 @@ class VerticalPingGraph(ctk.CTkFrame):
                 self._resume_btn.pack(side="right", padx=6)
         else:
             self._status_badge.configure(
-                text="🟢 LIVE (Auto-follow)",
+                text="LIVE (Auto-follow)",
                 text_color=STATUS_GREEN
             )
             if self._resume_btn.winfo_ismapped():
@@ -1197,16 +1209,16 @@ class VerticalPingGraph(ctk.CTkFrame):
             server_str = f"{sample.server_rtt_ms:.1f} ms"
             server_color = STATUS_GREEN if sample.server_rtt_ms <= 60 else (STATUS_YELLOW if sample.server_rtt_ms <= 130 else STATUS_RED)
 
-        self._chip_server.configure(text=f"🎯 Game Server: {server_str}", text_color=server_color)
+        self._chip_server.configure(text=f"Game Server: {server_str}", text_color=server_color)
 
         local_str = f"{sample.local_rtt_ms:.1f} ms" if sample.local_rtt_ms is not None else "N/A (Router Ping Blocked)"
         local_color = STATUS_YELLOW if (sample.local_rtt_ms and sample.local_rtt_ms > 15.0) else ACCENT_GLACIER_BLUE
-        self._chip_local.configure(text=f"🏠 Local Igloo Router: {local_str}", text_color=local_color)
+        self._chip_local.configure(text=f"Local Igloo Router: {local_str}", text_color=local_color)
 
-        self._chip_wan.configure(text=f"🌐 WAN Data: {sample.wan_bytes_this_sample} Bytes")
+        self._chip_wan.configure(text=f"WAN Data: {sample.wan_bytes_this_sample} Bytes")
 
         detail_msg = sample.diagnosis_detail if sample.diagnosis_detail else "Normal ping latency."
-        self._insp_detail_lbl.configure(text=f"🐧 Noot Forensic Analysis: {detail_msg}")
+        self._insp_detail_lbl.configure(text=f"Noot Forensic Analysis: {detail_msg}")
         self._insp_detail_box.configure(border_color=tag_color)
 
     def _clear_selection(self) -> None:

@@ -25,6 +25,8 @@ from analyzer import (
     format_wan_bytes,
 )
 from presets import (
+    FONT_BODY,
+    FONT_HEAD,
     ACCENT_BEAK_ORANGE,
     ACCENT_GLACIER_BLUE,
     BG_TUXEDO_DARK,
@@ -99,7 +101,7 @@ class CustomServerModal(ctk.CTkToplevel):
         self.geometry(f"{w}x{h}+{x}+{y}")
 
     def _build_ui(self) -> None:
-        card = ctk.CTkFrame(self, fg_color=CARD_DARK, corner_radius=10, border_width=1, border_color="#334155")
+        card = ctk.CTkFrame(self, fg_color=CARD_DARK, corner_radius=4, border_width=1, border_color=("#D5D9E0", "#262B33"))
         card.pack(fill="both", expand=True, padx=16, pady=16)
 
         # 1. PIN BOTTOM FOOTER FIRST
@@ -111,9 +113,10 @@ class CustomServerModal(ctk.CTkToplevel):
             text="Cancel",
             width=95,
             height=34,
-            font=ctk.CTkFont(size=11),
-            fg_color="#334155",
-            hover_color="#475569",
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            fg_color=("#D5D9E0", "#262B33"),
+            text_color=TEXT_SNOW,
+            hover_color=("#B8BFC9", "#3A414C"),
             command=self.destroy
         )
         btn_cancel.pack(side="right", padx=(8, 0))
@@ -123,9 +126,10 @@ class CustomServerModal(ctk.CTkToplevel):
             text="Save & Select Target",
             width=165,
             height=34,
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
             fg_color=ACCENT_BEAK_ORANGE,
-            hover_color="#EA580C",
+            text_color="#FFFFFF",
+            hover_color=("#B53B0A", "#C2410C"),
             command=self._on_save
         )
         btn_save.pack(side="right")
@@ -133,8 +137,8 @@ class CustomServerModal(ctk.CTkToplevel):
         # 2. HEADER & INPUT FIELDS
         title = ctk.CTkLabel(
             card,
-            text="➕ Register Custom Game Target",
-            font=ctk.CTkFont(size=14, weight="bold"),
+            text="Register Custom Game Target",
+            font=ctk.CTkFont(family=FONT_HEAD, size=16, weight="bold"),
             text_color=TEXT_SNOW
         )
         title.pack(side="top", anchor="w", padx=16, pady=(16, 4))
@@ -142,8 +146,8 @@ class CustomServerModal(ctk.CTkToplevel):
         subtitle = ctk.CTkLabel(
             card,
             text="Enter IP or hostname with optional TCP fallback port.",
-            font=ctk.CTkFont(size=11),
-            text_color="#94A3B8"
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            text_color=("#5B6472", "#9BA3AF")
         )
         subtitle.pack(side="top", anchor="w", padx=16, pady=(0, 12))
 
@@ -152,25 +156,25 @@ class CustomServerModal(ctk.CTkToplevel):
         form_frame.pack(side="top", fill="both", expand=True, padx=12, pady=(0, 4))
 
         # 1. Server Name
-        lbl_name = ctk.CTkLabel(form_frame, text="Server Name / Display Label:", font=ctk.CTkFont(size=11), text_color=TEXT_SNOW)
+        lbl_name = ctk.CTkLabel(form_frame, text="Server Name / Display Label:", font=ctk.CTkFont(family=FONT_BODY, size=12), text_color=TEXT_SNOW)
         lbl_name.pack(anchor="w", padx=4, pady=(2, 2))
-        self.entry_name = ctk.CTkEntry(form_frame, placeholder_text="e.g. Frankfurt Community Node", fg_color="#0F172A", border_color="#334155")
+        self.entry_name = ctk.CTkEntry(form_frame, placeholder_text="e.g. Frankfurt Community Node", fg_color=("#F3F4F6", "#0D0F12"), border_color=("#D5D9E0", "#262B33"), text_color=TEXT_SNOW)
         self.entry_name.pack(fill="x", padx=4, pady=(0, 8))
 
         # 2. Host / IP
-        lbl_host = ctk.CTkLabel(form_frame, text="Host or IPv4 Address:", font=ctk.CTkFont(size=11), text_color=TEXT_SNOW)
+        lbl_host = ctk.CTkLabel(form_frame, text="Host or IPv4 Address:", font=ctk.CTkFont(family=FONT_BODY, size=12), text_color=TEXT_SNOW)
         lbl_host.pack(anchor="w", padx=4, pady=(2, 2))
-        self.entry_host = ctk.CTkEntry(form_frame, placeholder_text="e.g. 198.51.100.24 or game.hub.com", fg_color="#0F172A", border_color="#334155")
+        self.entry_host = ctk.CTkEntry(form_frame, placeholder_text="e.g. 198.51.100.24 or game.hub.com", fg_color=("#F3F4F6", "#0D0F12"), border_color=("#D5D9E0", "#262B33"), text_color=TEXT_SNOW)
         self.entry_host.pack(fill="x", padx=4, pady=(0, 8))
 
         # 3. Port
-        lbl_port = ctk.CTkLabel(form_frame, text="TCP Fallback Port (if ICMP is blocked):", font=ctk.CTkFont(size=11), text_color=TEXT_SNOW)
+        lbl_port = ctk.CTkLabel(form_frame, text="TCP Fallback Port (if ICMP is blocked):", font=ctk.CTkFont(family=FONT_BODY, size=12), text_color=TEXT_SNOW)
         lbl_port.pack(anchor="w", padx=4, pady=(2, 2))
-        self.entry_port = ctk.CTkEntry(form_frame, placeholder_text="443", fg_color="#0F172A", border_color="#334155")
+        self.entry_port = ctk.CTkEntry(form_frame, placeholder_text="443", fg_color=("#F3F4F6", "#0D0F12"), border_color=("#D5D9E0", "#262B33"), text_color=TEXT_SNOW)
         self.entry_port.insert(0, "443")
         self.entry_port.pack(fill="x", padx=4, pady=(0, 6))
 
-        self.lbl_error = ctk.CTkLabel(form_frame, text="", font=ctk.CTkFont(size=11), text_color=STATUS_RED)
+        self.lbl_error = ctk.CTkLabel(form_frame, text="", font=ctk.CTkFont(family=FONT_BODY, size=12), text_color=STATUS_RED)
         self.lbl_error.pack(anchor="w", padx=4, pady=(0, 2))
 
     def _on_save(self) -> None:
@@ -252,7 +256,7 @@ class WarningModal(ctk.CTkToplevel):
         self.geometry(f"{w}x{h}+{x}+{y}")
 
     def _build_ui(self, message: str) -> None:
-        card = ctk.CTkFrame(self, fg_color=CARD_DARK, corner_radius=10, border_width=1, border_color="#D97706")
+        card = ctk.CTkFrame(self, fg_color=CARD_DARK, corner_radius=4, border_width=1, border_color="#B7791F")
         card.pack(fill="both", expand=True, padx=16, pady=16)
 
         # 1. PIN FOOTER (CHECKBOX + ACTION BUTTONS) TO BOTTOM FIRST!
@@ -263,10 +267,10 @@ class WarningModal(ctk.CTkToplevel):
         self.chk_suppress = ctk.CTkCheckBox(
             footer,
             text="Don't ask again this session",
-            font=ctk.CTkFont(size=11),
-            text_color="#94A3B8",
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            text_color=("#5B6472", "#9BA3AF"),
             fg_color=ACCENT_BEAK_ORANGE,
-            hover_color="#EA580C"
+            hover_color=("#B53B0A", "#C2410C")
         )
         self.chk_suppress.pack(anchor="w", pady=(0, 12))
 
@@ -278,9 +282,10 @@ class WarningModal(ctk.CTkToplevel):
             text="Cancel",
             width=95,
             height=36,
-            font=ctk.CTkFont(size=11, weight="bold"),
-            fg_color="#334155",
-            hover_color="#475569",
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
+            fg_color=("#D5D9E0", "#262B33"),
+            text_color=TEXT_SNOW,
+            hover_color=("#B8BFC9", "#3A414C"),
             command=self.destroy
         )
         btn_cancel.pack(side="right", padx=(10, 0))
@@ -290,9 +295,10 @@ class WarningModal(ctk.CTkToplevel):
             text="Proceed (Noot Noot!)",
             width=170,
             height=36,
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
             fg_color=ACCENT_BEAK_ORANGE,
-            hover_color="#EA580C",
+            text_color="#FFFFFF",
+            hover_color=("#B53B0A", "#C2410C"),
             command=self._on_proceed
         )
         btn_proceed.pack(side="right")
@@ -300,9 +306,9 @@ class WarningModal(ctk.CTkToplevel):
         # 2. TOP TITLE
         title = ctk.CTkLabel(
             card,
-            text="⚠️ High Data / Network Load Warning",
-            font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#FBBF24"
+            text="High Data / Network Load Warning",
+            font=ctk.CTkFont(family=FONT_HEAD, size=16, weight="bold"),
+            text_color=("#B45309", "#FBBF24")
         )
         title.pack(side="top", anchor="w", padx=16, pady=(16, 8))
 
@@ -310,17 +316,17 @@ class WarningModal(ctk.CTkToplevel):
         # Scrollable container prevents multi-line text from pushing the footer
         scroll_frame = ctk.CTkScrollableFrame(
             card,
-            fg_color="#0F172A",
-            corner_radius=8,
+            fg_color=("#F3F4F6", "#0D0F12"),
+            corner_radius=4,
             border_width=1,
-            border_color="#334155"
+            border_color=("#D5D9E0", "#262B33")
         )
         scroll_frame.pack(side="top", fill="both", expand=True, padx=16, pady=(0, 4))
 
         lbl_msg = ctk.CTkLabel(
             scroll_frame,
             text=message,
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
             text_color=TEXT_SNOW,
             justify="left",
             wraplength=440
@@ -377,7 +383,7 @@ class InvalidTimerModal(ctk.CTkToplevel):
         self.geometry(f"{w}x{h}+{x}+{y}")
 
     def _build_ui(self, message: str) -> None:
-        card = ctk.CTkFrame(self, fg_color=CARD_DARK, corner_radius=10, border_width=1, border_color=STATUS_RED)
+        card = ctk.CTkFrame(self, fg_color=CARD_DARK, corner_radius=4, border_width=1, border_color=STATUS_RED)
         card.pack(fill="both", expand=True, padx=16, pady=16)
 
         # Pin button to bottom first
@@ -389,17 +395,18 @@ class InvalidTimerModal(ctk.CTkToplevel):
             text="OK (Noot!)",
             width=110,
             height=32,
-            font=ctk.CTkFont(size=11, weight="bold"),
-            fg_color="#334155",
-            hover_color="#475569",
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
+            fg_color=("#D5D9E0", "#262B33"),
+            text_color=TEXT_SNOW,
+            hover_color=("#B8BFC9", "#3A414C"),
             command=self.destroy
         )
         btn.pack(side="right")
 
         title = ctk.CTkLabel(
             card,
-            text="⚠️ Invalid Timer Duration",
-            font=ctk.CTkFont(size=14, weight="bold"),
+            text="Invalid Timer Duration",
+            font=ctk.CTkFont(family=FONT_HEAD, size=16, weight="bold"),
             text_color=STATUS_RED
         )
         title.pack(side="top", anchor="w", padx=16, pady=(16, 6))
@@ -407,7 +414,7 @@ class InvalidTimerModal(ctk.CTkToplevel):
         lbl = ctk.CTkLabel(
             card,
             text=f"{message}\n\nResetting timer duration to 60 seconds.",
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
             text_color=TEXT_SNOW,
             justify="left",
             wraplength=390
@@ -466,9 +473,10 @@ class QuickGuideModal(ctk.CTkToplevel):
             text="Close Guide (Noot!)",
             width=160,
             height=34,
-            font=ctk.CTkFont(size=11, weight="bold"),
-            fg_color="#334155",
-            hover_color="#475569",
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
+            fg_color=("#D5D9E0", "#262B33"),
+            text_color=TEXT_SNOW,
+            hover_color=("#B8BFC9", "#3A414C"),
             command=self.destroy
         )
         btn_close.pack(side="right")
@@ -477,16 +485,16 @@ class QuickGuideModal(ctk.CTkToplevel):
         container = ctk.CTkScrollableFrame(
             self,
             fg_color=CARD_DARK,
-            corner_radius=10,
+            corner_radius=4,
             border_width=1,
-            border_color="#334155"
+            border_color=("#D5D9E0", "#262B33")
         )
         container.pack(side="top", fill="both", expand=True, padx=16, pady=(16, 0))
 
         title = ctk.CTkLabel(
             container,
-            text="🐧 Ping Gu — Network Diagnostic Cheat-Sheet",
-            font=ctk.CTkFont(size=15, weight="bold"),
+            text="Ping Gu — Network Diagnostic Cheat-Sheet",
+            font=ctk.CTkFont(family=FONT_HEAD, size=17, weight="bold"),
             text_color=TEXT_SNOW
         )
         title.pack(anchor="w", padx=12, pady=(10, 2))
@@ -494,8 +502,8 @@ class QuickGuideModal(ctk.CTkToplevel):
         sub = ctk.CTkLabel(
             container,
             text="How to interpret Noot-O-Meter telemetry and isolate gaming lag.",
-            font=ctk.CTkFont(size=11),
-            text_color="#94A3B8"
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            text_color=("#5B6472", "#9BA3AF")
         )
         sub.pack(anchor="w", padx=12, pady=(0, 12))
 
@@ -503,63 +511,63 @@ class QuickGuideModal(ctk.CTkToplevel):
         sec1_title = ctk.CTkLabel(
             container,
             text="1. Noot-O-Meter Verdicts",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(family=FONT_HEAD, size=14, weight="bold"),
             text_color=ACCENT_GLACIER_BLUE
         )
         sec1_title.pack(anchor="w", padx=12, pady=(4, 2))
 
         verdicts = [
-            ("🟢 NOOT EXCELLENT (Competitive Ready)", "Sub-35ms ping, 0% packet loss, micro-jitter < 5ms. Hit registration is instant; movements are frame-perfect."),
-            ("🟡 NOOT PLAYABLE (Multiplayer Friendly)", "Ping 35-75ms, packet loss < 0.5%, jitter < 10ms. Smooth for MMOs, RPGs, and casual online games."),
-            ("🟠 WARNING / NOOT STUTTER (Elevated Jitter)", "Jitter > 10ms or P99 spike > 90ms. Noticeable hitching during intense firefights or frame timing desync."),
-            ("🔴 NOOT DISASTER (Severe Packet Loss / Lag)", "Packet loss >= 2.0% or extreme latency spikes (>150ms). Severe rubberbanding, phantom shots, and potential disconnections."),
+            ("NOOT EXCELLENT (Competitive Ready)", "Sub-35ms ping, 0% packet loss, micro-jitter < 5ms. Hit registration is instant; movements are frame-perfect."),
+            ("NOOT PLAYABLE (Multiplayer Friendly)", "Ping 35-75ms, packet loss < 0.5%, jitter < 10ms. Smooth for MMOs, RPGs, and casual online games."),
+            ("WARNING / NOOT STUTTER (Elevated Jitter)", "Jitter > 10ms or P99 spike > 90ms. Noticeable hitching during intense firefights or frame timing desync."),
+            ("NOOT DISASTER (Severe Packet Loss / Lag)", "Packet loss >= 2.0% or extreme latency spikes (>150ms). Severe rubberbanding, phantom shots, and potential disconnections."),
         ]
         for v_name, v_desc in verdicts:
-            v_box = ctk.CTkFrame(container, fg_color="#0F172A", corner_radius=6)
+            v_box = ctk.CTkFrame(container, fg_color=("#F3F4F6", "#0D0F12"), corner_radius=3)
             v_box.pack(fill="x", padx=12, pady=3)
-            ctk.CTkLabel(v_box, text=v_name, font=ctk.CTkFont(size=10, weight="bold"), text_color=TEXT_SNOW).pack(anchor="w", padx=8, pady=(4, 1))
-            ctk.CTkLabel(v_box, text=v_desc, font=ctk.CTkFont(size=10), text_color="#94A3B8", wraplength=520, justify="left").pack(anchor="w", padx=8, pady=(0, 4))
+            ctk.CTkLabel(v_box, text=v_name, font=ctk.CTkFont(family=FONT_BODY, size=11, weight="bold"), text_color=TEXT_SNOW).pack(anchor="w", padx=8, pady=(4, 1))
+            ctk.CTkLabel(v_box, text=v_desc, font=ctk.CTkFont(family=FONT_BODY, size=11), text_color=("#5B6472", "#9BA3AF"), wraplength=520, justify="left").pack(anchor="w", padx=8, pady=(0, 4))
 
         # Section 2: Home Wi-Fi vs. ISP Lag Isolation
         sec2_title = ctk.CTkLabel(
             container,
             text="2. Isolating Lag: Home Wi-Fi (Igloo) vs. ISP (Blizzard)",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(family=FONT_HEAD, size=14, weight="bold"),
             text_color=ACCENT_BEAK_ORANGE
         )
         sec2_title.pack(anchor="w", padx=12, pady=(12, 2))
 
         iso_points = [
-            ("🏠 Local Router Ping Spiking (>15ms)", "The problem is inside your house. Wi-Fi interference, someone streaming 4K, or local LAN saturation. Switch to Ethernet cable or restart your router."),
-            ("🌐 Local Router Stable (<2ms), Server Ping Spiking", "Your home network is solid! The lag is on your ISP's side: peering congestion, bad WAN routing, or game server overload."),
-            ("🐟 Bufferbloat (Load Test)", "If ping spikes dramatically when bandwidth is saturated, your router lacks SQM (Smart Queue Management) to prioritize gaming packets over downloads.")
+            ("Local Router Ping Spiking (>15ms)", "The problem is inside your house. Wi-Fi interference, someone streaming 4K, or local LAN saturation. Switch to Ethernet cable or restart your router."),
+            ("Local Router Stable (<2ms), Server Ping Spiking", "Your home network is solid! The lag is on your ISP's side: peering congestion, bad WAN routing, or game server overload."),
+            ("Bufferbloat (Load Test)", "If ping spikes dramatically when bandwidth is saturated, your router lacks SQM (Smart Queue Management) to prioritize gaming packets over downloads.")
         ]
         for i_name, i_desc in iso_points:
-            i_box = ctk.CTkFrame(container, fg_color="#0F172A", corner_radius=6)
+            i_box = ctk.CTkFrame(container, fg_color=("#F3F4F6", "#0D0F12"), corner_radius=3)
             i_box.pack(fill="x", padx=12, pady=3)
-            ctk.CTkLabel(i_box, text=i_name, font=ctk.CTkFont(size=10, weight="bold"), text_color=TEXT_SNOW).pack(anchor="w", padx=8, pady=(4, 1))
-            ctk.CTkLabel(i_box, text=i_desc, font=ctk.CTkFont(size=10), text_color="#94A3B8", wraplength=520, justify="left").pack(anchor="w", padx=8, pady=(0, 4))
+            ctk.CTkLabel(i_box, text=i_name, font=ctk.CTkFont(family=FONT_BODY, size=11, weight="bold"), text_color=TEXT_SNOW).pack(anchor="w", padx=8, pady=(4, 1))
+            ctk.CTkLabel(i_box, text=i_desc, font=ctk.CTkFont(family=FONT_BODY, size=11), text_color=("#5B6472", "#9BA3AF"), wraplength=520, justify="left").pack(anchor="w", padx=8, pady=(0, 4))
 
         # Section 3: Genre Modes
         sec3_title = ctk.CTkLabel(
             container,
             text="3. Game Genre Traffic Profiles",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(family=FONT_HEAD, size=14, weight="bold"),
             text_color=ACCENT_GLACIER_BLUE
         )
         sec3_title.pack(anchor="w", padx=12, pady=(12, 2))
 
         genres = [
-            ("🎯 Tactical Shooter (CS2 / Valorant)", "20 Hz rate, small 64B packets. Simulates high tick-rate competitive shooters to reveal frame-by-frame micro-stutters."),
-            ("🪂 Battle Royale (Apex / Warzone)", "10 Hz rate, 128B packets. Simulates typical medium tick-rate shooter traffic."),
-            ("⚔️ MMO / RTS Raid (WoW / FFXIV)", "2 Hz rate, large 1350B packets. Stresses MTU packet fragmentation for crowded boss encounters."),
-            ("⚙️ Custom Noot Stress", "Adjustable from 32B to 1472B payload and 1 to 50 Hz ping rate to test your connection to its absolute limits.")
+            ("Tactical Shooter (CS2 / Valorant)", "20 Hz rate, small 64B packets. Simulates high tick-rate competitive shooters to reveal frame-by-frame micro-stutters."),
+            ("Battle Royale (Apex / Warzone)", "10 Hz rate, 128B packets. Simulates typical medium tick-rate shooter traffic."),
+            ("MMO / RTS Raid (WoW / FFXIV)", "2 Hz rate, large 1350B packets. Stresses MTU packet fragmentation for crowded boss encounters."),
+            ("Custom Noot Stress", "Adjustable from 32B to 1472B payload and 1 to 50 Hz ping rate to test your connection to its absolute limits.")
         ]
         for g_name, g_desc in genres:
-            g_box = ctk.CTkFrame(container, fg_color="#0F172A", corner_radius=6)
+            g_box = ctk.CTkFrame(container, fg_color=("#F3F4F6", "#0D0F12"), corner_radius=3)
             g_box.pack(fill="x", padx=12, pady=3)
-            ctk.CTkLabel(g_box, text=g_name, font=ctk.CTkFont(size=10, weight="bold"), text_color=TEXT_SNOW).pack(anchor="w", padx=8, pady=(4, 1))
-            ctk.CTkLabel(g_box, text=g_desc, font=ctk.CTkFont(size=10), text_color="#94A3B8", wraplength=520, justify="left").pack(anchor="w", padx=8, pady=(0, 4))
+            ctk.CTkLabel(g_box, text=g_name, font=ctk.CTkFont(family=FONT_BODY, size=11, weight="bold"), text_color=TEXT_SNOW).pack(anchor="w", padx=8, pady=(4, 1))
+            ctk.CTkLabel(g_box, text=g_desc, font=ctk.CTkFont(family=FONT_BODY, size=11), text_color=("#5B6472", "#9BA3AF"), wraplength=520, justify="left").pack(anchor="w", padx=8, pady=(0, 4))
 
 
 class PingGuApp(ctk.CTk):
@@ -658,8 +666,21 @@ class PingGuApp(ctk.CTk):
     # ========================================================================
     # 1. HEADER BAR
     # ========================================================================
+    @staticmethod
+    def _theme_button_text() -> str:
+        return "Dark Mode" if ctk.get_appearance_mode() == "Light" else "Light Mode"
+
+    def _toggle_theme(self) -> None:
+        """Switches between light and dark mode and remembers the choice."""
+        new_mode = "Dark" if ctk.get_appearance_mode() == "Light" else "Light"
+        ctk.set_appearance_mode(new_mode)
+        self._user_config["theme"] = new_mode
+        save_user_config(self._user_config)
+        self.btn_theme.configure(text=self._theme_button_text())
+        self.graph.apply_theme()
+
     def _build_header_bar(self) -> None:
-        header = ctk.CTkFrame(self, fg_color=CARD_DARK, corner_radius=10, border_width=1, border_color="#334155")
+        header = ctk.CTkFrame(self, fg_color=CARD_DARK, corner_radius=4, border_width=1, border_color=("#D5D9E0", "#262B33"))
         header.pack(fill="x", padx=12, pady=(10, 5))
 
         # Left: App Brand & Subtitle
@@ -686,23 +707,23 @@ class PingGuApp(ctk.CTk):
             title_text = "PING GU"
         else:
             self.header_logo_lbl = None
-            title_text = "🐧 PING GU"
+            title_text = "PING GU"
 
         self.title_lbl = ctk.CTkLabel(
             brand_line,
             text=title_text,
-            font=ctk.CTkFont(size=18, weight="bold"),
+            font=ctk.CTkFont(family=FONT_HEAD, size=20, weight="bold"),
             text_color=TEXT_SNOW
         )
         self.title_lbl.pack(side="left", padx=(0, 8))
 
         self.gw_badge = ctk.CTkLabel(
             brand_line,
-            text=f"🏠 Local Router: {self._gateway_ip}",
-            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
-            fg_color="#0F172A",
+            text=f"Local Router: {self._gateway_ip}",
+            font=ctk.CTkFont(family=FONT_HEAD, size=13, weight="bold"),
+            fg_color=("#F3F4F6", "#0D0F12"),
             text_color=ACCENT_GLACIER_BLUE,
-            corner_radius=6,
+            corner_radius=3,
             padx=8,
             pady=2
         )
@@ -711,8 +732,8 @@ class PingGuApp(ctk.CTk):
         subtitle_lbl = ctk.CTkLabel(
             left_box,
             text="Gaming Ping & Stability Monitor",
-            font=ctk.CTkFont(size=11),
-            text_color="#94A3B8"
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            text_color=("#5B6472", "#9BA3AF")
         )
         subtitle_lbl.pack(anchor="w", pady=(2, 0))
 
@@ -724,10 +745,10 @@ class PingGuApp(ctk.CTk):
         self.wan_badge = ctk.CTkLabel(
             right_box,
             text="Data Used: 0.0 KB",
-            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
-            fg_color="#0F172A",
+            font=ctk.CTkFont(family=FONT_HEAD, size=13, weight="bold"),
+            fg_color=("#F3F4F6", "#0D0F12"),
             text_color=ACCENT_GLACIER_BLUE,
-            corner_radius=6,
+            corner_radius=3,
             padx=10,
             pady=4
         )
@@ -736,15 +757,29 @@ class PingGuApp(ctk.CTk):
         # ❓ Guide Button
         self.btn_guide = ctk.CTkButton(
             right_box,
-            text="❓ Guide",
+            text="Guide",
             width=75,
             height=26,
-            font=ctk.CTkFont(size=11, weight="bold"),
-            fg_color="#334155",
-            hover_color="#475569",
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
+            fg_color=("#D5D9E0", "#262B33"),
+            text_color=TEXT_SNOW,
+            hover_color=("#B8BFC9", "#3A414C"),
             command=self._open_guide_modal
         )
-        self.btn_guide.pack(side="left", padx=(0, 10))
+        self.btn_guide.pack(side="left", padx=(0, 6))
+
+        self.btn_theme = ctk.CTkButton(
+            right_box,
+            text=self._theme_button_text(),
+            width=75,
+            height=26,
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
+            fg_color=("#D5D9E0", "#262B33"),
+            hover_color=("#B8BFC9", "#3A414C"),
+            text_color=TEXT_SNOW,
+            command=self._toggle_theme
+        )
+        self.btn_theme.pack(side="left", padx=(0, 10))
 
         # Inline Custom Timer Control Group
         timer_group = ctk.CTkFrame(right_box, fg_color="transparent")
@@ -753,7 +788,7 @@ class PingGuApp(ctk.CTk):
         lbl_timer = ctk.CTkLabel(
             timer_group,
             text="Timer:",
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
             text_color=TEXT_SNOW
         )
         lbl_timer.pack(side="left", padx=(0, 4))
@@ -762,10 +797,11 @@ class PingGuApp(ctk.CTk):
             timer_group,
             width=55,
             height=26,
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
             justify="center",
-            fg_color="#0F172A",
-            border_color="#334155"
+            text_color=TEXT_SNOW,
+            fg_color=("#F3F4F6", "#0D0F12"),
+            border_color=("#D5D9E0", "#262B33")
         )
         self.timer_entry.insert(0, "60")
         self.timer_entry.pack(side="left", padx=(0, 4))
@@ -775,12 +811,14 @@ class PingGuApp(ctk.CTk):
             values=["sec", "min", "Continuous ∞"],
             width=95,
             height=26,
-            font=ctk.CTkFont(size=11),
-            dropdown_font=ctk.CTkFont(size=11),
-            fg_color="#0F172A",
-            button_color="#334155",
-            button_hover_color="#475569",
-            dropdown_fg_color="#0F172A",
+            text_color=TEXT_SNOW,
+            dropdown_text_color=TEXT_SNOW,
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            dropdown_font=ctk.CTkFont(family=FONT_BODY, size=12),
+            fg_color=("#F3F4F6", "#0D0F12"),
+            button_color=("#D5D9E0", "#262B33"),
+            button_hover_color=("#B8BFC9", "#3A414C"),
+            dropdown_fg_color=("#F3F4F6", "#0D0F12"),
             command=self._on_timer_unit_changed
         )
         self.timer_unit_menu.set("sec")
@@ -801,7 +839,7 @@ class PingGuApp(ctk.CTk):
         Responsive 2-Row Control Deck ensuring that target selection and action
         buttons never clip or hide on non-maximized windows.
         """
-        self.deck = ctk.CTkFrame(self, fg_color=CARD_DARK, corner_radius=10, border_width=1, border_color="#334155")
+        self.deck = ctk.CTkFrame(self, fg_color=CARD_DARK, corner_radius=4, border_width=1, border_color=("#D5D9E0", "#262B33"))
         self.deck.pack(fill="x", padx=12, pady=4)
 
         # --------------------------------------------------------------------
@@ -811,7 +849,7 @@ class PingGuApp(ctk.CTk):
         row0.pack(fill="x", padx=12, pady=(8, 4))
 
         # Target Server (Left side of Row 0)
-        lbl_srv = ctk.CTkLabel(row0, text="Target Server:", font=ctk.CTkFont(size=11, weight="bold"), text_color=TEXT_SNOW)
+        lbl_srv = ctk.CTkLabel(row0, text="Target Server:", font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"), text_color=TEXT_SNOW)
         lbl_srv.pack(side="left", padx=(0, 6))
 
         self._refresh_server_options()
@@ -819,10 +857,13 @@ class PingGuApp(ctk.CTk):
             row0,
             values=self._server_display_list,
             width=280,
-            font=ctk.CTkFont(size=11),
-            dropdown_font=ctk.CTkFont(size=11),
-            fg_color="#0F172A",
-            border_color="#334155",
+            text_color=TEXT_SNOW,
+            dropdown_text_color=TEXT_SNOW,
+            dropdown_fg_color=CARD_DARK,
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            dropdown_font=ctk.CTkFont(family=FONT_BODY, size=12),
+            fg_color=("#F3F4F6", "#0D0F12"),
+            border_color=("#D5D9E0", "#262B33"),
             command=self._on_server_selected
         )
         saved_srv = self._user_config.get("selected_server_name", "Cloudflare Edge DNS")
@@ -835,15 +876,16 @@ class PingGuApp(ctk.CTk):
             text="+ Custom IP",
             width=90,
             height=28,
-            font=ctk.CTkFont(size=11),
-            fg_color="#334155",
-            hover_color="#475569",
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            fg_color=("#D5D9E0", "#262B33"),
+            text_color=TEXT_SNOW,
+            hover_color=("#B8BFC9", "#3A414C"),
             command=self._open_custom_server_modal
         )
         btn_add_srv.pack(side="left", padx=(0, 24))
 
         # Genre Profile (Right side of Row 0)
-        lbl_prof = ctk.CTkLabel(row0, text="Genre Profile:", font=ctk.CTkFont(size=11, weight="bold"), text_color=TEXT_SNOW)
+        lbl_prof = ctk.CTkLabel(row0, text="Genre Profile:", font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"), text_color=TEXT_SNOW)
         lbl_prof.pack(side="left", padx=(0, 4))
 
         prof_help = create_help_badge(
@@ -858,10 +900,13 @@ class PingGuApp(ctk.CTk):
             row0,
             values=self.genre_names,
             width=260,
-            font=ctk.CTkFont(size=11),
-            dropdown_font=ctk.CTkFont(size=11),
-            fg_color="#0F172A",
-            border_color="#334155",
+            text_color=TEXT_SNOW,
+            dropdown_text_color=TEXT_SNOW,
+            dropdown_fg_color=CARD_DARK,
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            dropdown_font=ctk.CTkFont(family=FONT_BODY, size=12),
+            fg_color=("#F3F4F6", "#0D0F12"),
+            border_color=("#D5D9E0", "#262B33"),
             command=self._on_genre_selected
         )
         saved_genre = self._user_config.get("selected_genre", "Tactical Shooter (CS2 / Valorant)")
@@ -871,7 +916,7 @@ class PingGuApp(ctk.CTk):
         # --------------------------------------------------------------------
         # COLLAPSIBLE SUB-ROW: Dynamic Custom Sliders (for "Custom Noot Stress")
         # --------------------------------------------------------------------
-        self.custom_sliders_frame = ctk.CTkFrame(self.deck, fg_color="#0F172A", corner_radius=8, border_width=1, border_color="#334155")
+        self.custom_sliders_frame = ctk.CTkFrame(self.deck, fg_color=("#F3F4F6", "#0D0F12"), corner_radius=4, border_width=1, border_color=("#D5D9E0", "#262B33"))
         slider_box = ctk.CTkFrame(self.custom_sliders_frame, fg_color="transparent")
         slider_box.pack(fill="x", padx=12, pady=6)
 
@@ -879,7 +924,7 @@ class PingGuApp(ctk.CTk):
         self.lbl_slider_payload = ctk.CTkLabel(
             slider_box,
             text="Payload Size: 64 Bytes",
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
             text_color=TEXT_SNOW,
             width=165,
             anchor="w"
@@ -902,7 +947,7 @@ class PingGuApp(ctk.CTk):
         self.lbl_slider_rate = ctk.CTkLabel(
             slider_box,
             text="Ping Rate: 5 Hz (Ticks/sec)",
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
             text_color=TEXT_SNOW,
             width=175,
             anchor="w"
@@ -931,10 +976,10 @@ class PingGuApp(ctk.CTk):
         self.pill_estimate = ctk.CTkLabel(
             row1,
             text="Est. Data: ~0.65 MB / min",
-            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
-            fg_color="#0F172A",
+            font=ctk.CTkFont(family=FONT_HEAD, size=13, weight="bold"),
+            fg_color=("#F3F4F6", "#0D0F12"),
             text_color=ACCENT_GLACIER_BLUE,
-            corner_radius=6,
+            corner_radius=3,
             padx=10,
             pady=5
         )
@@ -946,21 +991,26 @@ class PingGuApp(ctk.CTk):
             text="▶ START NOOT SCAN",
             width=170,
             height=34,
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(family=FONT_HEAD, size=14, weight="bold"),
             fg_color=ACCENT_BEAK_ORANGE,
-            hover_color="#EA580C",
+            text_color="#FFFFFF",
+            hover_color=("#B53B0A", "#C2410C"),
             command=self._toggle_scan
         )
         self.btn_start.pack(side="right", padx=(6, 0))
 
         self.btn_load_test = ctk.CTkButton(
             row1,
-            text="🐟 Load Test (5s)",
+            text="Load Test (5s)",
             width=140,
             height=34,
-            font=ctk.CTkFont(size=11, weight="bold"),
-            fg_color="#D97706",
-            hover_color="#B45309",
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
+            fg_color="transparent",
+            border_width=1,
+            border_color=("#B8BFC9", "#3A414C"),
+            text_color=("#14171C", "#E8EAED"),
+            text_color_disabled=("#7A828F", "#6B7280"),
+            hover_color=("#D5D9E0", "#262B33"),
             state="disabled",
             command=self._on_load_test_click
         )
@@ -978,9 +1028,10 @@ class PingGuApp(ctk.CTk):
             text="↺ Reset",
             width=85,
             height=34,
-            font=ctk.CTkFont(size=11, weight="bold"),
-            fg_color="#334155",
-            hover_color="#475569",
+            font=ctk.CTkFont(family=FONT_BODY, size=12, weight="bold"),
+            fg_color=("#D5D9E0", "#262B33"),
+            text_color=TEXT_SNOW,
+            hover_color=("#B8BFC9", "#3A414C"),
             command=self.reset_to_boot_state
         )
         self.btn_reset.pack(side="right", padx=(6, 0))
@@ -997,9 +1048,9 @@ class PingGuApp(ctk.CTk):
         self.verdict_card = ctk.CTkFrame(
             self,
             fg_color=CARD_DARK,
-            corner_radius=10,
+            corner_radius=4,
             border_width=1.5,
-            border_color="#334155"
+            border_color=("#D5D9E0", "#262B33")
         )
         self.verdict_card.pack(fill="x", padx=12, pady=4)
 
@@ -1010,7 +1061,7 @@ class PingGuApp(ctk.CTk):
         self.lbl_verdict_title = ctk.CTkLabel(
             top_line,
             text="CLICK SCAN NOOT — PICK A SERVER NOOT",
-            font=ctk.CTkFont(size=15, weight="bold"),
+            font=ctk.CTkFont(family=FONT_HEAD, size=17, weight="bold"),
             text_color=STATUS_GREEN
         )
         self.lbl_verdict_title.pack(side="left")
@@ -1019,10 +1070,10 @@ class PingGuApp(ctk.CTk):
         self.lbl_protocol_badge = ctk.CTkLabel(
             top_line,
             text="[Protocol: Standby]",
-            font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
-            fg_color="#0F172A",
-            text_color="#94A3B8",
-            corner_radius=6,
+            font=ctk.CTkFont(family=FONT_HEAD, size=13, weight="bold"),
+            fg_color=("#F3F4F6", "#0D0F12"),
+            text_color=("#5B6472", "#9BA3AF"),
+            corner_radius=3,
             padx=10,
             pady=2
         )
@@ -1032,8 +1083,8 @@ class PingGuApp(ctk.CTk):
         self.lbl_root_cause = ctk.CTkLabel(
             self.verdict_card,
             text="Select your target datacenter and genre profile above, then click Start Noot Scan.",
-            font=ctk.CTkFont(size=11),
-            text_color="#94A3B8",
+            font=ctk.CTkFont(family=FONT_BODY, size=12),
+            text_color=("#5B6472", "#9BA3AF"),
             anchor="w",
             justify="left"
         )
@@ -1075,26 +1126,26 @@ class PingGuApp(ctk.CTk):
             card = ctk.CTkFrame(
                 self.telemetry_deck,
                 fg_color=CARD_DARK,
-                corner_radius=8,
+                corner_radius=4,
                 border_width=1,
-                border_color="#334155"
+                border_color=("#D5D9E0", "#262B33")
             )
             card.pack(side="left", fill="both", expand=True, padx=(0 if i == 0 else 6, 0))
 
             top_box = ctk.CTkFrame(card, fg_color="transparent")
-            top_box.pack(fill="x", padx=10, pady=(6, 0))
+            top_box.pack(fill="x", padx=12, pady=(8, 0))
 
-            lbl_t = ctk.CTkLabel(top_box, text=title, font=ctk.CTkFont(size=10, weight="bold"), text_color="#64748B")
+            lbl_t = ctk.CTkLabel(top_box, text=title, font=ctk.CTkFont(family=FONT_BODY, size=11, weight="bold"), text_color=("#7A828F", "#6B7280"))
             lbl_t.pack(side="left")
 
             badge = create_help_badge(top_box, tip_text, title=f"{title} Help")
             badge.pack(side="right")
 
-            lbl_v = ctk.CTkLabel(card, text=val, font=ctk.CTkFont(family="Consolas", size=15, weight="bold"), text_color=TEXT_SNOW)
-            lbl_v.pack(anchor="w", padx=10, pady=(0, 0))
+            lbl_v = ctk.CTkLabel(card, text=val, font=ctk.CTkFont(family=FONT_HEAD, size=28, weight="bold"), text_color=TEXT_SNOW)
+            lbl_v.pack(anchor="w", padx=12, pady=(0, 0))
 
-            lbl_s = ctk.CTkLabel(card, text=sub, font=ctk.CTkFont(size=10), text_color="#94A3B8")
-            lbl_s.pack(anchor="w", padx=10, pady=(0, 6))
+            lbl_s = ctk.CTkLabel(card, text=sub, font=ctk.CTkFont(family=FONT_BODY, size=11), text_color=("#5B6472", "#9BA3AF"))
+            lbl_s.pack(anchor="w", padx=12, pady=(0, 8))
 
             self.telemetry_labels[key] = {
                 "title": lbl_t,
@@ -1207,7 +1258,7 @@ class PingGuApp(ctk.CTk):
         if estimate.needs_warning:
             self._safe_configure(
                 self.pill_estimate,
-                text=f"⚠️ Est. Data: {estimate.human_str} [HIGH USAGE]",
+                text=f"Est. Data: {estimate.human_str} [HIGH USAGE]",
                 text_color=ACCENT_BEAK_ORANGE
             )
         else:
@@ -1335,14 +1386,14 @@ class PingGuApp(ctk.CTk):
             self.btn_start,
             text="▶ START NOOT SCAN",
             fg_color=ACCENT_BEAK_ORANGE,
-            hover_color="#EA580C"
+            hover_color=("#B53B0A", "#C2410C")
         )
         self.btn_load_test.configure(state="disabled")
         self.server_combo.configure(state="normal")
         self.genre_combo.configure(state="normal")
 
         if reason:
-            self._safe_configure(self.lbl_root_cause, text=f"ℹ️ {reason}")
+            self._safe_configure(self.lbl_root_cause, text=f"ℹ{reason}")
 
     def _on_scanner_sample(self, sample: PingSample) -> None:
         """Called by background scanner thread; enqueues sample safely."""
@@ -1373,7 +1424,7 @@ class PingGuApp(ctk.CTk):
         if self._scanner:
             self._safe_configure(
                 self.btn_load_test,
-                text="🐟 Loading (5s)...",
+                text="Loading (5s)...",
                 state="disabled",
                 fg_color="#9A3412"
             )
@@ -1383,9 +1434,9 @@ class PingGuApp(ctk.CTk):
                 if self._is_scanning:
                     self._safe_configure(
                         self.btn_load_test,
-                        text="🐟 Load Test (5s)",
+                        text="Load Test (5s)",
                         state="normal",
-                        fg_color="#D97706"
+                        fg_color="transparent"
                     )
 
             self.after(5500, _restore_btn)
@@ -1428,13 +1479,13 @@ class PingGuApp(ctk.CTk):
 
         # 2. Update Protocol Badge & Verdict Card
         if metrics["sample_count"] == 0 and not self._is_scanning:
-            self._safe_configure(self.lbl_protocol_badge, text="[Protocol: Standby]", text_color="#94A3B8")
+            self._safe_configure(self.lbl_protocol_badge, text="[Protocol: Standby]", text_color=("#5B6472", "#9BA3AF"))
             self._safe_configure(
                 self.lbl_verdict_title,
                 text="CLICK SCAN NOOT — PICK A SERVER NOOT",
                 text_color=STATUS_GREEN
             )
-            self._safe_configure(self.verdict_card, border_color="#334155")
+            self._safe_configure(self.verdict_card, border_color=("#D5D9E0", "#262B33"))
             self._safe_configure(
                 self.lbl_root_cause,
                 text="Select your target datacenter and genre profile above, then click Start Noot Scan."
@@ -1488,7 +1539,7 @@ class PingGuApp(ctk.CTk):
                 self._safe_configure(self.telemetry_labels["pill_igloo"]["sub"], text="SPIKING! (Wi-Fi/LAN Delay)", text_color=STATUS_RED)
             else:
                 self._safe_configure(self.telemetry_labels["pill_igloo"]["val"], text=f"{local_ms:.1f} ms", text_color=ACCENT_GLACIER_BLUE)
-                self._safe_configure(self.telemetry_labels["pill_igloo"]["sub"], text="Solid (Wi-Fi/LAN)", text_color="#94A3B8")
+                self._safe_configure(self.telemetry_labels["pill_igloo"]["sub"], text="Solid (Wi-Fi/LAN)", text_color=("#5B6472", "#9BA3AF"))
 
     def _check_auto_stop_conditions(self) -> None:
         """Evaluates custom timer countdown and auto-stop condition."""
@@ -1535,7 +1586,7 @@ class PingGuApp(ctk.CTk):
             text="CLICK SCAN NOOT — PICK A SERVER NOOT",
             text_color=STATUS_GREEN
         )
-        self._safe_configure(self.verdict_card, border_color="#334155")
+        self._safe_configure(self.verdict_card, border_color=("#D5D9E0", "#262B33"))
         self._safe_configure(
             self.lbl_root_cause,
             text="Select your target datacenter and genre profile above, then click Start Noot Scan."
@@ -1543,24 +1594,24 @@ class PingGuApp(ctk.CTk):
         self._safe_configure(
             self.lbl_protocol_badge,
             text="[Protocol: Standby]",
-            text_color="#94A3B8"
+            text_color=("#5B6472", "#9BA3AF")
         )
 
         # 5. Reset 5 Metric Cards
         self._safe_configure(self.telemetry_labels["pill_avg"]["val"], text="0.0 ms", text_color=TEXT_SNOW)
-        self._safe_configure(self.telemetry_labels["pill_avg"]["sub"], text="Live: -- ms", text_color="#94A3B8")
+        self._safe_configure(self.telemetry_labels["pill_avg"]["sub"], text="Live: -- ms", text_color=("#5B6472", "#9BA3AF"))
 
         self._safe_configure(self.telemetry_labels["pill_p99"]["val"], text="0.0 ms", text_color=TEXT_SNOW)
-        self._safe_configure(self.telemetry_labels["pill_p99"]["sub"], text="Worst 1% spike", text_color="#94A3B8")
+        self._safe_configure(self.telemetry_labels["pill_p99"]["sub"], text="Worst 1% spike", text_color=("#5B6472", "#9BA3AF"))
 
         self._safe_configure(self.telemetry_labels["pill_jitter"]["val"], text="0.0 ms", text_color=TEXT_SNOW)
-        self._safe_configure(self.telemetry_labels["pill_jitter"]["sub"], text="Sub-frame variance", text_color="#94A3B8")
+        self._safe_configure(self.telemetry_labels["pill_jitter"]["sub"], text="Sub-frame variance", text_color=("#5B6472", "#9BA3AF"))
 
         self._safe_configure(self.telemetry_labels["pill_loss"]["val"], text="0.0 %", text_color=STATUS_GREEN)
-        self._safe_configure(self.telemetry_labels["pill_loss"]["sub"], text="0 dropped packets", text_color="#94A3B8")
+        self._safe_configure(self.telemetry_labels["pill_loss"]["sub"], text="0 dropped packets", text_color=("#5B6472", "#9BA3AF"))
 
         self._safe_configure(self.telemetry_labels["pill_igloo"]["val"], text="0.0 ms", text_color=ACCENT_GLACIER_BLUE)
-        self._safe_configure(self.telemetry_labels["pill_igloo"]["sub"], text="Solid (Wi-Fi/LAN)", text_color="#94A3B8")
+        self._safe_configure(self.telemetry_labels["pill_igloo"]["sub"], text="Solid (Wi-Fi/LAN)", text_color=("#5B6472", "#9BA3AF"))
 
         # 6. Reset VerticalPingGraph
         self.graph.reset_to_boot()
