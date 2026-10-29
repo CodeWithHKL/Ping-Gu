@@ -82,7 +82,7 @@ def run_integration_tests() -> bool:
         # Verify Action Buttons in Control Deck Row 1
         assert app.btn_start.winfo_manager() == "pack", "START NOOT SCAN button must be packed"
         assert app.btn_load_test.winfo_manager() == "pack", "Load Test (5s) button must be packed"
-        assert app.btn_load_test.cget("text") == "🐟 Load Test (5s)", "Load Test button label mismatch"
+        assert app.btn_load_test.cget("text") == "Load Test (5s)", "Load Test button label mismatch"
         assert app.btn_reset.winfo_manager() == "pack", "Reset button must be packed"
         assert app.btn_reset.cget("text") == "↺ Reset", "Reset button label mismatch"
         assert app.btn_guide.winfo_manager() == "pack", "Guide button must be packed"

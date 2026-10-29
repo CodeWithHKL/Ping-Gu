@@ -301,6 +301,9 @@ def run_headless_verification() -> bool:
     app.geometry("1000x650")
     app.update()
     app.withdraw()  # Hide window during automated checks
+    # A pointer already over the canvas fires <Enter> and freezes an empty sample list;
+    # release it so rendering reads live samples regardless of the machine's cursor position.
+    app.graph._on_canvas_leave(None)
 
     try:
         graph = app.graph
@@ -339,20 +342,24 @@ def run_headless_verification() -> bool:
         print("[3/6] Testing Local Igloo Overlay Toggle...")
         graph.set_show_local_igloo(True)
         assert graph._show_local_igloo is True, "Igloo overlay not enabled"
-        assert "SPECTRUM (TOP: SERVER 250ms | BOTTOM: 🏠 IGLOO 50ms)" in graph._lbl_col_bar.cget("text")
-        assert "SRV / 🏠 IGLOO / DIAG" in graph._lbl_col_rtt.cget("text")
+        bar_txt = graph._lbl_col_bar.cget("text")
+        rtt_hdr = graph._lbl_col_rtt.cget("text")
+        assert "SPECTRUM (TOP: SERVER 250ms | BOTTOM: IGLOO 50ms)" in bar_txt, f"Dual spectrum header mismatch: '{bar_txt}'"
+        assert "SRV / IGLOO / DIAG" in rtt_hdr, f"Dual RTT header mismatch: '{rtt_hdr}'"
 
-        # Verify rendered text on visible row contains dual format
+        # Verify rendered text on visible row contains dual format (server | local)
         slot0_txt = graph._plot_canvas.itemcget(graph._row_slots[0]["rtt_text"], "text")
-        assert "🏠" in slot0_txt, f"Dual readout missing house icon in row text: '{slot0_txt}'"
+        assert " | " in slot0_txt, f"Dual readout missing server/local separator in row text: '{slot0_txt}' (hover_paused={graph._is_hover_paused})"
         print(f"      OK: Dual-track igloo overlay active: '{slot0_txt}'")
 
         graph.set_show_local_igloo(False)
         assert graph._show_local_igloo is False, "Igloo overlay not disabled"
-        assert "LATENCY SPECTRUM (0 ──────── 250ms CAP)" in graph._lbl_col_bar.cget("text")
-        assert "LATENCY  /  DIAGNOSIS" in graph._lbl_col_rtt.cget("text")
+        bar_txt = graph._lbl_col_bar.cget("text")
+        rtt_hdr = graph._lbl_col_rtt.cget("text")
+        assert "LATENCY SPECTRUM (0 ──────── 250ms CAP)" in bar_txt, f"Single spectrum header mismatch: '{bar_txt}'"
+        assert "LATENCY  /  DIAGNOSIS" in rtt_hdr, f"Single RTT header mismatch: '{rtt_hdr}'"
         slot0_single_txt = graph._plot_canvas.itemcget(graph._row_slots[0]["rtt_text"], "text")
-        assert "🏠" not in slot0_single_txt, f"Single readout should not contain house icon: '{slot0_single_txt}'"
+        assert " | " not in slot0_single_txt, f"Single readout should not contain dual separator: '{slot0_single_txt}'"
         print("      OK: Local Igloo overlay toggle works cleanly (split bars & dual readout verified)")
 
         # 7. Test Hover Pause & Freeze
